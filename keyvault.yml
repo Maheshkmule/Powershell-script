@@ -1,0 +1,45 @@
+trigger: none 
+
+schedules:
+  - cron: "0 * * * *"
+    displayName: Every one hour
+    branches:
+      include:
+        - main
+    always: true
+
+pool:
+  name: Linux - PG Hosted Managed pool (20.36.248.128)
+  #vmImage: 'ubuntu-latest'
+   
+
+steps:
+
+
+- task: AzurePowerShell@5
+  displayName: 'KeyVault Rotation NP BLOB'
+  inputs:
+    azureSubscription: 'AZ-RG-CS-eMagicScan-PaaS-AP-NonProd-01'
+    ScriptType: 'InlineScript'
+    Inline: |
+      $storageAccount = Get-AzStorageAccount -ResourceGroupName "AZ-RG-CS-eMagicScan-PaaS-AP-NonProd-01" -AccountName "emsclyblobstorage"
+      $ctx1 = $storageAccount.Context
+      echo $ctx1
+      $StartTime = Get-Date
+      $EndTime = $startTime.AddHours(2.0)
+      
+      $output= New-AzStorageContainerSASToken -Context $ctx1 `
+          -Name npdata `
+          -Permission racwl `
+          -ExpiryTime "$EndTime"
+      $keyvault = Get-AzKeyVault -VaultName 'emsclykeyvault'
+      echo $keyvault
+      $keyvault1 = Get-AzKeyVaultSecret -VaultName 'emsclykeyvault'
+      
+      echo $keyvault1
+      #$secretvalues = ConvertTo-SecureString $output -AsPlainText -Force
+      #Write-Host "$secretvalues"
+      #$secretaddnew = Set-AzKeyVaultSecret -VaultName $keyvault.VaultName -Name 'clyblobsastoken' -SecretValue $secretvalues
+      #Write-Host "$secretaddnew"
+    azurePowerShellVersion: 'LatestVersion'
+
