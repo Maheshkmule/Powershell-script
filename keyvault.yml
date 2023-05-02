@@ -9,7 +9,7 @@ schedules:
     always: true
 
 pool:
-  name: Linux - PG Hosted Managed pool (20.36.248.128)
+  name: agent pool
   #vmImage: 'ubuntu-latest'
    
 
@@ -17,12 +17,12 @@ steps:
 
 
 - task: AzurePowerShell@5
-  displayName: 'KeyVault Rotation NP BLOB'
+  displayName: 'KeyVault Rotation for ADLS'
   inputs:
-    azureSubscription: 'AZ-RG-CS-eMagicScan-PaaS-AP-NonProd-01'
+    azureSubscription: 'Service connection'
     ScriptType: 'InlineScript'
     Inline: |
-      $storageAccount = Get-AzStorageAccount -ResourceGroupName "AZ-RG-CS-eMagicScan-PaaS-AP-NonProd-01" -AccountName "emsclyblobstorage"
+      $storageAccount = Get-AzStorageAccount -ResourceGroupName "Resource GN" -AccountName "Storage Accn name"
       $ctx1 = $storageAccount.Context
       echo $ctx1
       $StartTime = Get-Date
@@ -32,14 +32,14 @@ steps:
           -Name npdata `
           -Permission racwl `
           -ExpiryTime "$EndTime"
-      $keyvault = Get-AzKeyVault -VaultName 'emsclykeyvault'
+      $keyvault = Get-AzKeyVault -VaultName 'Keyvault Name'
       echo $keyvault
-      $keyvault1 = Get-AzKeyVaultSecret -VaultName 'emsclykeyvault'
+      $keyvault1 = Get-AzKeyVaultSecret -VaultName 'Keyvault Name'
       
       echo $keyvault1
       #$secretvalues = ConvertTo-SecureString $output -AsPlainText -Force
       #Write-Host "$secretvalues"
-      #$secretaddnew = Set-AzKeyVaultSecret -VaultName $keyvault.VaultName -Name 'clyblobsastoken' -SecretValue $secretvalues
+      #$secretaddnew = Set-AzKeyVaultSecret -VaultName $keyvault.VaultName -Name 'Secrete name' -SecretValue $secretvalues
       #Write-Host "$secretaddnew"
     azurePowerShellVersion: 'LatestVersion'
 
